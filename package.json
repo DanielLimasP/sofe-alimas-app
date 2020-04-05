@@ -56,5 +56,9 @@
   },
   "ember": {
     "edition": "octane"
+  },
+  "dependencies": {
+    "@amcharts/amcharts4": "^4.9.13",
+    "@amcharts/amcharts4-geodata": "^4.1.14"
   }
 }
