@@ -327,7 +327,29 @@ am4core.ready(function() {
 
   // Crear indice de los paises en el mapa
   var countryIndexMap = {};
-  var list = covid_world_timeline[covid_world_timeline.length - 1].list;
+
+  //var list = covid_world_timeline[covid_world_timeline.length - 1].list;
+
+  // Creamos una lista a partir de la respuesta que nos de el API
+  var json_data;
+  var req = fetch('http://api.coronastatistics.live/timeline/global')
+            .then(function (response) {
+                //console.log(response.json())
+                return response.json();
+            }).then(function(data){
+                console.log(data);
+                return data;
+            })
+            .catch(function (err) {
+                console.log('error: ' + err);
+            });
+            
+  var list = [];
+  console.log(json_data)
+  for(var i in json_data)
+    list.push([i, json_data[i]]);          
+  
+
   for (let i = 0; i < list.length; i++) {
     var country = list[i]
     countryIndexMap[country.id] = i;
