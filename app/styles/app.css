@@ -3,6 +3,10 @@ html {
     font-family: 'Oxanium', cursive;
   }
 
+  h1{
+      font-size: 56pt;
+  }
+
   *, *:before, *:after {
     box-sizing: inherit;
   }
@@ -13,6 +17,20 @@ html {
     display: flex;
   }
 
+  .col-md-6{
+      margin: 10px;
+  }
+
+  .col-md-4{
+    padding: 10px;
+  }
+
+  .card{
+    padding: 5px;
+    border: 1px solid #212327;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
   .panel {
     margin-top: 25px;
     margin-right: 25px;
