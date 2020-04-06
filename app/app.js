@@ -305,7 +305,7 @@ am4core.ready(function() {
   var currentIndex;
   var currentCountry = "World";
 
-  // last date of the data
+  // Ultima fecha obtenida
   var lastDate = new Date(covid_total_timeline[covid_total_timeline.length - 1].date);
   var currentDate = lastDate;
 
@@ -322,10 +322,10 @@ am4core.ready(function() {
   var perCapita = false;
 
   //////////////////////////////////////////////////////////////////////////////
-  // PREPARE DATA
+  // Preparar los datos
   //////////////////////////////////////////////////////////////////////////////
 
-  // make a map of country indexes for later use
+  // Crear indice de los paises en el mapa
   var countryIndexMap = {};
   var list = covid_world_timeline[covid_world_timeline.length - 1].list;
   for (let i = 0; i < list.length; i++) {
@@ -333,14 +333,13 @@ am4core.ready(function() {
     countryIndexMap[country.id] = i;
   }
 
-  // calculated active cases in world data (active = confirmed - recovered)
+  // Calcular numero de casos activos
   for (let i = 0; i < covid_total_timeline.length; i++) {
     var di = covid_total_timeline[i];
     di.active = di.confirmed - di.recovered;
   }
 
-  // function that returns current slide
-  // if index is not set, get last slide
+  // Funcion que regresa el ultimo slide 
   function getSlideData(index) {
     if (index == undefined) {
       index = covid_world_timeline.length - 1;
@@ -348,7 +347,7 @@ am4core.ready(function() {
 
     var data = covid_world_timeline[index];
 
-    // augment with names
+    // Uso de los nombres de los paises
     for (let i = 0; i < data.list.length; i++) {
       data.list[i].name = idToName(data.list[i].id);
     }
@@ -356,24 +355,22 @@ am4core.ready(function() {
     return data;
   }
 
-  // get slide data
+  // Obtener los datos del slide
   var slideData = getSlideData();
 
-  // as we will be modifying raw data, make a copy
+  // creamos una copia de los datos antes de modificarlos o realizar operaciones sobre ellos
   var mapData = JSON.parse(JSON.stringify(slideData.list));
 
-  // remove items with 0 values for better performance
+  // Quitamos items con 0 datos o entradas
   for (let i = mapData.length - 1; i >= 0; i--) {
     if (mapData[i].confirmed == 0) {
       mapData.splice(i, 1);
     }
   }
 
-
   var max = { confirmed: 0, recovered: 0, deaths: 0 };
   var maxPC = { confirmed: 0, recovered: 0, deaths: 0, active: 0 };
 
-  // the last day will have most
   for (let i = 0; i < mapData.length; i++) {
     let di = mapData[i];
     if (di.confirmed > max.confirmed) {
@@ -388,13 +385,13 @@ am4core.ready(function() {
     max.active = max.confirmed;
   }
 
-  // END OF DATA
+  // Fin de DATA o Datos
 
   //////////////////////////////////////////////////////////////////////////////
   // LAYOUT & CHARTS
   //////////////////////////////////////////////////////////////////////////////
 
-  // main container
+  // Contenedor principal
   var container = am4core.create("chartdiv", am4core.Container);
   container.width = am4core.percent(100);
   container.height = am4core.percent(100);
@@ -406,29 +403,27 @@ am4core.ready(function() {
   container.tooltip.getFillFromObject = false;
   container.tooltip.getStrokeFromObject = false;
 
-  // MAP CHART 
+  // Grafico del mapa
   var mapChart = container.createChild(am4maps.MapChart);
   mapChart.height = am4core.percent(80);
   mapChart.homeGeoPoint = { longitude: 0, latitude: -2 };
   mapChart.geodata = am4geodata_worldLow;
 
-  // Set projection
-  // https://www.amcharts.com/docs/v4/chart-types/map/#Setting_projection
-  // instead of Miller, you can use Mercator or many other projections available: https://www.amcharts.com/demos/map-using-d3-projections/
+  // Proyeccion del mapa
   mapChart.projection = new am4maps.projections.Miller();
   mapChart.panBehavior = "move";
 
-  // Map polygon series (defines how country areas look and behave)
+  // Serie de poligonos del mapa (Define como lucen y se comportan los paises)
   var polygonSeries = mapChart.series.push(new am4maps.MapPolygonSeries());
   polygonSeries.dataFields.id = "id";
   polygonSeries.dataFields.value = "confirmedPC";
   polygonSeries.interpolationDuration = 0;
 
-  polygonSeries.exclude = ["AQ"]; // Antarctica is excluded in non-globe projection
+  polygonSeries.exclude = ["AQ"]; // Se excluye la antartida xd
   polygonSeries.useGeodata = true;
   polygonSeries.nonScalingStroke = true;
   polygonSeries.strokeWidth = 0.5;
-  // this helps to place bubbles in the visual middle of the area
+  // Coloca las burbujas en medio del area visual
   polygonSeries.calculateVisualCenter = true;
   polygonSeries.data = mapData;
 
@@ -444,7 +439,6 @@ am4core.ready(function() {
   polygonTemplate.events.on("over", handleCountryOver);
   polygonTemplate.events.on("out", handleCountryOut);
 
-
   polygonSeries.heatRules.push({
     "target": polygonTemplate,
     "property": "fill",
@@ -453,12 +447,9 @@ am4core.ready(function() {
     "dataField": "value"
   })
 
-
-
-  // you can have pacific - centered map if you set this to -154.8
   mapChart.deltaLongitude = -8;
 
-  // polygon states
+  // Poligonos de los paises
   var polygonHoverState = polygonTemplate.states.create("hover");
   polygonHoverState.transitionDuration = 1400;
   polygonHoverState.properties.fill = countryHoverColor;
@@ -472,8 +463,6 @@ am4core.ready(function() {
 
   bubbleSeries.dataFields.value = "confirmed";
   bubbleSeries.dataFields.id = "id";
-
-  // adjust tooltip
   bubbleSeries.tooltip.animationDuration = 0;
   bubbleSeries.tooltip.showInViewport = false;
   bubbleSeries.tooltip.background.fillOpacity = 0.2;
@@ -483,8 +472,7 @@ am4core.ready(function() {
   bubbleSeries.tooltip.background.fill = am4core.color("#000000");
 
   var imageTemplate = bubbleSeries.mapImages.template;
-  // if you want bubbles to become bigger when zoomed, set this to false
-  imageTemplate.nonScaling = true;
+  imageTemplate.nonScaling = false;
   imageTemplate.strokeOpacity = 0;
   imageTemplate.fillOpacity = 0.55;
   imageTemplate.tooltipText = "{name}: [bold]{value}[/]";
@@ -494,26 +482,21 @@ am4core.ready(function() {
   imageTemplate.events.on("out", handleImageOut);
   imageTemplate.events.on("hit", handleImageHit);
 
-  // this is needed for the tooltip to point to the top of the circle instead of the middle
   imageTemplate.adapter.add("tooltipY", function(tooltipY, target) {
     return -target.children.getIndex(0).radius;
   })
 
-  // When hovered, circles become non-opaque  
+  // Opacidad de las burbujas
   var imageHoverState = imageTemplate.states.create("hover");
   imageHoverState.properties.fillOpacity = 1;
 
-  // add circle inside the image
   var circle = imageTemplate.createChild(am4core.Circle);
-  // this makes the circle to pulsate a bit when showing it
   circle.hiddenState.properties.scale = 0.0001;
   circle.hiddenState.transitionDuration = 2000;
   circle.defaultState.transitionDuration = 2000;
   circle.defaultState.transitionEasing = am4core.ease.elasticOut;
-  // later we set fill color on template (when changing what type of data the map should show) and all the clones get the color because of this
   circle.applyOnClones = true;
 
-  // heat rule makes the bubbles to be of a different width. Adjust min/max for smaller/bigger radius of a bubble
   bubbleSeries.heatRules.push({
     "target": circle,
     "property": "radius",
@@ -522,7 +505,6 @@ am4core.ready(function() {
     "dataField": "value"
   })
 
-  // when data items validated, hide 0 value bubbles (because min size is set)
   bubbleSeries.events.on("dataitemsvalidated", function() {
     bubbleSeries.dataItems.each((dataItem) => {
       var mapImage = dataItem.mapImage;
@@ -536,7 +518,7 @@ am4core.ready(function() {
     })
   })
 
-  // this places bubbles at the visual center of a country
+  // Funcion para colocar los circulos aproximadamente en el centro de los paises
   imageTemplate.adapter.add("latitude", function(latitude, target) {
     var polygon = polygonSeries.getPolygonById(target.dataItem.id);
     if (polygon) {
@@ -561,11 +543,11 @@ am4core.ready(function() {
     return longitude;
   })
 
-  // END OF MAP  
+  // Fin de MAP CHART
 
-  // top title
+  // Titulo COVID-19 A lo largo del mundo
   var title = mapChart.titles.create();
-  title.fontSize = "1.5em";
+  title.fontSize = "1.9em";
   title.text = "COVID-19 World Spread Data";
   title.align = "left";
   title.horizontalCenter = "left";
@@ -574,37 +556,33 @@ am4core.ready(function() {
   title.fill = am4core.color("#ffffff");
   title.y = 20;
 
-
-
-
-
-  // buttons & chart container
+  // Contenedor de botones y charts--TBD
   var buttonsAndChartContainer = container.createChild(am4core.Container);
   buttonsAndChartContainer.layout = "vertical";
-  buttonsAndChartContainer.height = am4core.percent(45); // make this bigger if you want more space for the chart
+  buttonsAndChartContainer.height = am4core.percent(45); 
   buttonsAndChartContainer.width = am4core.percent(100);
   buttonsAndChartContainer.valign = "bottom";
 
-  // country name and buttons container
+  // Contenedor de los nombres de los paises
   var nameAndButtonsContainer = buttonsAndChartContainer.createChild(am4core.Container)
   nameAndButtonsContainer.width = am4core.percent(100);
   nameAndButtonsContainer.padding(0, 10, 5, 20);
   nameAndButtonsContainer.layout = "horizontal";
 
-  // name of a country and date label
+  // Nombre del pais y etiqueta de datos
   var countryName = nameAndButtonsContainer.createChild(am4core.Label);
-  countryName.fontSize = "1.1em";
+  countryName.fontSize = "2em";
   countryName.fill = am4core.color("#ffffff");
   countryName.valign = "middle";
 
-  // buttons container (active/confirmed/recovered/deaths)
+  // Contenedor de los siguientes botones -> active/confirmed/recovered/deaths
   var buttonsContainer = nameAndButtonsContainer.createChild(am4core.Container);
   buttonsContainer.layout = "grid";
   buttonsContainer.width = am4core.percent(100);
   buttonsContainer.x = 10;
   buttonsContainer.contentAlign = "right";
 
-  // Chart & slider container
+  // Contenedor de la grafica y el slider de bottom
   var chartAndSliderContainer = buttonsAndChartContainer.createChild(am4core.Container);
   chartAndSliderContainer.layout = "vertical";
   chartAndSliderContainer.height = am4core.percent(100);
@@ -616,7 +594,7 @@ am4core.ready(function() {
   chartAndSliderContainer.paddingTop = 12;
   chartAndSliderContainer.paddingBottom = 0;
 
-  // Slider container
+  // Contenedor del slider
   var sliderContainer = chartAndSliderContainer.createChild(am4core.Container);
   sliderContainer.width = am4core.percent(100);
   sliderContainer.padding(0, 15, 15, 10);
@@ -648,45 +626,7 @@ am4core.ready(function() {
     }
   });
 
-  // play button
-  var playButton = sliderContainer.createChild(am4core.PlayButton);
-  playButton.valign = "middle";
-  // play button behavior
-  playButton.events.on("toggled", function(event) {
-    if (event.target.isActive) {
-      play();
-    } else {
-      stop();
-    }
-  })
-
-  // play behavior
-  function play() {
-    if (!sliderAnimation) {
-      sliderAnimation = slider.animate({ property: "start", to: 1, from: 0 }, 50000, am4core.ease.linear).pause();
-      sliderAnimation.events.on("animationended", () => {
-        playButton.isActive = false;
-      })
-    }
-
-    if (slider.start >= 1) {
-      slider.start = 0;
-      sliderAnimation.start();
-    }
-    sliderAnimation.resume();
-    playButton.isActive = true;
-  }
-
-  // stop behavior
-  function stop() {
-    if (sliderAnimation) {
-      sliderAnimation.pause();
-    }
-    playButton.isActive = false;
-  }
-
-  // BOTTOM CHART
-  // https://www.amcharts.com/docs/v4/chart-types/xy-chart/
+  // BOTTOM CHART en X y Y
   var lineChart = chartAndSliderContainer.createChild(am4charts.XYChart);
   lineChart.fontSize = "0.8em";
   lineChart.paddingRight = 30;
@@ -696,11 +636,10 @@ am4core.ready(function() {
   lineChart.paddingBottom = 5;
   lineChart.paddingTop = 3;
 
-  // make a copy of data as we will be modifying it
+  // Copiar los datos para luego modificarlos
   lineChart.data = JSON.parse(JSON.stringify(covid_total_timeline));
 
-  // date axis
-  // https://www.amcharts.com/docs/v4/concepts/axes/date-axis/
+  // Eje de la fecha
   var dateAxis = lineChart.xAxes.push(new am4charts.DateAxis());
   dateAxis.renderer.minGridDistance = 50;
   dateAxis.renderer.grid.template.stroke = am4core.color("#000000");
@@ -710,13 +649,8 @@ am4core.ready(function() {
   dateAxis.tooltip.background.fill = activeColor;
   dateAxis.tooltip.background.stroke = activeColor;
   dateAxis.renderer.labels.template.fill = am4core.color("#ffffff");
-  /*
-  dateAxis.renderer.labels.template.adapter.add("fillOpacity", function(fillOpacity, target){
-      return dateAxis.valueToPosition(target.dataItem.value) + 0.1;
-  })*/
 
-  // value axis
-  // https://www.amcharts.com/docs/v4/concepts/axes/value-axis/
+  // Eje del valor
   var valueAxis = lineChart.yAxes.push(new am4charts.ValueAxis());
   valueAxis.renderer.opposite = true;
   valueAxis.interpolationDuration = 3000;
@@ -724,7 +658,6 @@ am4core.ready(function() {
   valueAxis.renderer.grid.template.strokeOpacity = 0.25;
   valueAxis.renderer.minGridDistance = 30;
   valueAxis.renderer.maxLabelPosition = 0.98;
-  //valueAxis.renderer.baseGrid.disabled = true;
   valueAxis.tooltip.disabled = true;
   valueAxis.extraMax = 0.05;
   valueAxis.maxPrecision = 0;
@@ -748,26 +681,23 @@ am4core.ready(function() {
     return min;
   })
 
-  // cursor
-  // https://www.amcharts.com/docs/v4/concepts/chart-cursor/
+  // Cursor
   lineChart.cursor = new am4charts.XYCursor();
   lineChart.cursor.maxTooltipDistance = 0;
-  lineChart.cursor.behavior = "none"; // set zoomX for a zooming possibility
+  lineChart.cursor.behavior = "none"; 
   lineChart.cursor.lineY.disabled = true;
   lineChart.cursor.lineX.stroke = activeColor;
   lineChart.cursor.xAxis = dateAxis;
-  // this prevents cursor to move to the clicked location while map is dragged
+  // Estas lineas previenen que el cursor se mueva cuando arrastramos el mapa
   am4core.getInteraction().body.events.off("down", lineChart.cursor.handleCursorDown, lineChart.cursor)
   am4core.getInteraction().body.events.off("up", lineChart.cursor.handleCursorUp, lineChart.cursor)
 
-  // legend
-  // https://www.amcharts.com/docs/v4/concepts/legend/  
+  // Leyenda de BOTTOM CHART (Leyenda tambien puede significar...)
   lineChart.legend = new am4charts.Legend();
   lineChart.legend.parent = lineChart.plotContainer;
   lineChart.legend.labels.template.fill = am4core.color("#ffffff");
   lineChart.legend.markers.template.height = 8;
   lineChart.legend.contentAlign = "left";
-  //lineChart.legend.fontSize = "10px";
   lineChart.legend.itemContainers.template.valign = "middle";
   var legendDown = false;
   lineChart.legend.itemContainers.template.events.on("down", function() {
@@ -778,7 +708,6 @@ am4core.ready(function() {
       legendDown = false;
     }, 100)
   })
-
 
   var seriesTypeSwitch = lineChart.legend.createChild(am4core.SwitchButton);
   seriesTypeSwitch.leftLabel.text = "totals";
@@ -951,19 +880,8 @@ am4core.ready(function() {
   })
 
 
-  // data warning label
-  var label = lineChart.plotContainer.createChild(am4core.Label);
-  label.text = "Current day stats may be incomplete until countries submit their data.";
-  label.fill = am4core.color("#ffffff");
-  label.fontSize = "0.8em";
-  label.paddingBottom = 4;
-  label.opacity = 0.5;
-  label.align = "right";
-  label.horizontalCenter = "right";
-  label.verticalCenter = "bottom";
-
-  // BUTTONS
-  // create buttons
+  // BOTONES
+  // Creacion de los botones
   var activeButton = addButton("active", activeColor);
   var confirmedButton = addButton("confirmed", confirmedColor);
   var recoveredButton = addButton("recovered", recoveredColor);
@@ -971,12 +889,11 @@ am4core.ready(function() {
 
   var buttons = { active: activeButton, confirmed: confirmedButton, recovered: recoveredButton, deaths: deathsButton };
 
-  // add button
+  // Anadir boton
   function addButton(name, color) {
     var button = buttonsContainer.createChild(am4core.Button)
     button.label.valign = "middle"
     button.label.fill = am4core.color("#ffffff");
-    //button.label.fontSize = "11px";
     button.background.cornerRadius(30, 30, 30, 30);
     button.background.strokeOpacity = 0.3
     button.background.fillOpacity = 0;
@@ -997,7 +914,6 @@ am4core.ready(function() {
     circle.marginRight = 5;
     button.icon = circle;
 
-    // save name to dummy data for later use
     button.dummyData = name;
 
     var circleActiveState = circle.states.create("active");
@@ -1009,13 +925,11 @@ am4core.ready(function() {
     return button;
   }
 
-  // handle button clikc
+  // Click
   function handleButtonClick(event) {
-    // we saved name to dummy data
     changeDataType(event.target.dummyData);
   }
 
-  // change data type (active/confirmed/recovered/deaths)
   function changeDataType(name) {
     currentType = name;
     currentTypeName = name;
@@ -1025,16 +939,13 @@ am4core.ready(function() {
 
     bubbleSeries.mapImages.template.tooltipText = "[bold]{name}: {value}[/] [font-size:10px]\n" + currentTypeName;
 
-    // make button active
     var activeButton = buttons[name];
     activeButton.isActive = true;
-    // make other buttons inactive
     for (let key in buttons) {
       if (buttons[key] != activeButton) {
         buttons[key].isActive = false;
       }
     }
-    // tell series new field name
     bubbleSeries.dataFields.value = name;
     polygonSeries.dataFields.value = name + "PC";
 
@@ -1048,22 +959,20 @@ am4core.ready(function() {
     })
 
 
-    // change color of bubbles
-    // setting colors on mapImage for tooltip colors
+    // Cambiar el color de las burbujas en relacion al boton activado
     bubbleSeries.mapImages.template.fill = colors[name];
     bubbleSeries.mapImages.template.stroke = colors[name];
-    // first child is circle
     bubbleSeries.mapImages.template.children.getIndex(0).fill = colors[name];
 
     dateAxis.tooltip.background.fill = colors[name];
     dateAxis.tooltip.background.stroke = colors[name];
     lineChart.cursor.lineX.stroke = colors[name];
 
-    // show series
+    // Mostrar las burbujas
     if (seriesTypeSwitch.isActive) {
       var currentSeries = columnSeries[name];
       currentSeries.show();
-      // hide other series
+      // Ocultar las que no queremos que aparezcan
       for (let key in columnSeries) {
         if (columnSeries[key] != currentSeries) {
           columnSeries[key].hide();
@@ -1073,15 +982,13 @@ am4core.ready(function() {
     else {
       var currentSeries = series[name];
       currentSeries.show();
-      // hide other series
+      // Ocultar las que no queremos que aparezcan
       for (let key in series) {
         if (series[key] != currentSeries) {
           series[key].hide();
         }
       }
     }
-
-    // update heat rule's maxValue
     bubbleSeries.heatRules.getIndex(0).maxValue = max[currentType];
     polygonSeries.heatRules.getIndex(0).maxValue = maxPC[currentType];
     if (perCapita) {
@@ -1090,36 +997,34 @@ am4core.ready(function() {
     }
   }
 
-  // select a country
+  // Funcion para seleccionar un pais
   function selectCountry(mapPolygon) {
     resetHover();
     polygonSeries.hideTooltip();
 
-    // if the same country is clicked show world
     if (currentPolygon == mapPolygon) {
       currentPolygon.isActive = false;
       currentPolygon = undefined;
       showWorld();
       return;
     }
-    // save current polygon
+    // guardar el pais o poligono actual
     currentPolygon = mapPolygon;
     var countryIndex = countryIndexMap[mapPolygon.dataItem.id];
     currentCountry = mapPolygon.dataItem.dataContext.name;
 
-    // make others inactive
+    // Hacer que los demas se vuelvan inactivos
     polygonSeries.mapPolygons.each(function(polygon) {
       polygon.isActive = false;
     })
 
-    // clear timeout if there is one
     if (countryDataTimeout) {
       clearTimeout(countryDataTimeout);
     }
-    // we delay change of data for better performance (so that data is not changed whil zooming)
+    // Timeout para retrieve de los datos(?)
     countryDataTimeout = setTimeout(function() {
       setCountryData(countryIndex);
-    }, 1000); // you can adjust number, 1000 is one second
+    }, 1000); // -> un segundo
 
     updateTotals(currentIndex);
     updateCountryName();
@@ -1142,12 +1047,10 @@ am4core.ready(function() {
     }
   }
 
-  // change line chart data to the selected countries  
+  // Set de los datos de los paises
   function setCountryData(countryIndex) {
-    // instead of setting whole data array, we modify current raw data so that a nice animation would happen
     for (let i = 0; i < lineChart.data.length; i++) {
       var di = covid_world_timeline[i].list;
-
       var countryData = di[countryIndex];
       var dataContext = lineChart.data[i];
       if (countryData) {
@@ -1188,14 +1091,12 @@ am4core.ready(function() {
     })
   }
 
-  // what happens when a country is rolled-over
   function rollOverCountry(mapPolygon) {
 
     resetHover();
     if (mapPolygon) {
       mapPolygon.isHover = true;
 
-      // make bubble hovered too
       var image = bubbleSeries.getImageById(mapPolygon.dataItem.id);
       if (image) {
         image.dataItem.dataContext.name = mapPolygon.dataItem.dataContext.name;
@@ -1203,7 +1104,6 @@ am4core.ready(function() {
       }
     }
   }
-  // what happens when a country is rolled-out
   function rollOutCountry(mapPolygon) {
     var image = bubbleSeries.getImageById(mapPolygon.dataItem.id)
 
@@ -1213,24 +1113,13 @@ am4core.ready(function() {
     }
   }
 
-  // rotate and zoom
-  function rotateAndZoom(mapPolygon) {
-    polygonSeries.hideTooltip();
-    var animation = mapChart.animate([{ property: "deltaLongitude", to: -mapPolygon.visualLongitude }, { property: "deltaLatitude", to: -mapPolygon.visualLatitude }], 1000)
-    animation.events.on("animationended", function() {
-      mapChart.zoomToMapObject(mapPolygon, getZoomLevel(mapPolygon));
-    })
-  }
-
-  // calculate zoom level (default is too close)
   function getZoomLevel(mapPolygon) {
     var w = mapPolygon.polygon.bbox.width;
     var h = mapPolygon.polygon.bbox.width;
-    // change 2 to smaller walue for a more close zoom
     return Math.min(mapChart.seriesWidth / (w * 2), mapChart.seriesHeight / (h * 2))
   }
 
-  // show world data
+  // Mostrar datos mundiales
   function showWorld() {
     currentCountry = "World";
     currentPolygon = undefined;
@@ -1239,15 +1128,12 @@ am4core.ready(function() {
     if (countryDataTimeout) {
       clearTimeout(countryDataTimeout);
     }
-
-    // make all inactive
     polygonSeries.mapPolygons.each(function(polygon) {
       polygon.isActive = false;
     })
 
     updateCountryName();
 
-    // update line chart data (again, modifying instead of setting new data for a nice animation)
     for (let i = 0; i < lineChart.data.length; i++) {
       var di = covid_total_timeline[i];
       var dataContext = lineChart.data[i];
@@ -1266,12 +1152,11 @@ am4core.ready(function() {
     mapChart.goHome();
   }
 
-  // updates country name and date
   function updateCountryName() {
     countryName.text = currentCountry + ", " + mapChart.dateFormatter.format(currentDate, "MMM dd, yyyy");
   }
 
-  // update total values in buttons
+  // Actualiza el valor total en los botones
   function updateTotals(index) {
     if (!isNaN(index)) {
       var di = covid_total_timeline[index];
@@ -1297,9 +1182,7 @@ am4core.ready(function() {
     }
   }
 
-  // update map data
   function updateMapData(data) {
-    //modifying instead of setting new data for a nice animation
     bubbleSeries.dataItems.each(function(dataItem) {
       dataItem.dataContext.confirmed = 0;
       dataItem.dataContext.deaths = 0;
@@ -1400,7 +1283,6 @@ am4core.ready(function() {
     updateTotals(currentIndex);
   });
 
-  // set initial data and names
   updateCountryName();
   changeDataType("active");
   populateCountries(slideData.list);
@@ -1411,8 +1293,9 @@ am4core.ready(function() {
     polygonSeries.mapPolygons.template.tooltipText = "[bold]{name}: {value.formatNumber('#.')}[/]\n[font-size:10px]" + currentTypeName + " per million"
   }
 
+
   /**
-   * Country/state list on the right
+   * Lista/Tabla de paises a la derecha
    */
 
   function populateCountries(list) {
