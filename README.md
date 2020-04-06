@@ -56,3 +56,14 @@ Make use of the many generators for code, try `ember help generate` for more det
   * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
 * https://coronastatistics.live/
 * https://www.amcharts.com/
+
+## API Endpoints
+
+* http://api.coronastatistics.live/all
+* http://api.coronastatistics.live/countries
+* http://api.coronastatistics.live/countries?sort={parameter}
+* http://api.coronastatistics.live/countries/{country_name}
+* http://api.coronastatistics.live/timeline
+* http://api.coronastatistics.live/timeline/global
+* http://api.coronastatistics.live/timeline/{country_name}
+
