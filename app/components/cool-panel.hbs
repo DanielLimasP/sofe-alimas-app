@@ -1,0 +1,11 @@
+    <div class="panels">
+        <div class="panel panel1">
+            {{yield}}
+        </div>
+    </div>
+
+  <script>
+    const panels = document.querySelectorAll('.panel')
+    panels.forEach(panel => panel.classList.toggle('open'))
+    panels.forEach(panel => panel.classList.toggle('open-active'))
+  </script>

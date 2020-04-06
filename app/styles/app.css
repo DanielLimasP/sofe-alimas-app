@@ -1,3 +1,63 @@
+html {
+    box-sizing: border-box;
+    font-family: 'Oxanium', cursive;
+  }
+
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+
+  .panels {
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .panel {
+    margin-top: 25px;
+    margin-right: 25px;
+    margin-left: 25px;
+    background: lightgray;
+    color: #212327;
+    text-align: center;     
+    /* Safari transitionend event.propertyName === flex */
+    /* Chrome + FF transitionend event.propertyName === flex-grow */
+    font-size: 40px;
+    background-size: cover;
+    background-position: center;
+    flex: 1;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel > *:first-child { transform: translateY(-100%); }
+  .panel.open-active > *:first-child { transform: translateY(0); }
+  .panel > *:last-child { transform: translateY(100%); }
+  .panel.open-active > *:last-child { transform: translateY(0); }
+
+  .panel p {
+    text-transform: uppercase;
+    font-family: 'Oxanium', cursive;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.72), 0 0 14px rgba(0, 0, 0, 0.45);
+    font-size: 20vw;
+  }
+  
+  .panel p:nth-child(2) {
+    font-size: 4em;
+  }
+
+  .panel.open {
+    flex: 5;
+    font-size: 40px;
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .panel p {
+      font-size: 1em;
+    }
+  }
+
 body {
 	font-family: 'Oxanium', cursive;
 	background-color: #212327;
