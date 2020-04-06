@@ -1,7 +1,6 @@
 # sofe-alimas-app
 
-This README outlines the details of collaborating on this Ember application.
-A short introduction of this app could easily go here.
+Cornavirus tracker app. Made possible by amcharts, corona.live and ember.
 
 ## Prerequisites
 
@@ -46,12 +45,22 @@ Make use of the many generators for code, try `ember help generate` for more det
 
 ### Deploying
 
-Specify what it takes to deploy your app.
+* Further deployment of the app is still TBD...
 
 ## Further Reading / Useful Links
 
 * [ember.js](https://emberjs.com/)
 * [ember-cli](https://ember-cli.com/)
-* Development Browser Extensions
-  * [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
-  * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
+* https://coronastatistics.live/
+* https://www.amcharts.com/
+
+## API Endpoints
+
+* http://api.coronastatistics.live/all
+* http://api.coronastatistics.live/countries
+* http://api.coronastatistics.live/countries?sort={parameter}
+* http://api.coronastatistics.live/countries/{country_name}
+* http://api.coronastatistics.live/timeline
+* http://api.coronastatistics.live/timeline/global
+* http://api.coronastatistics.live/timeline/{country_name}
+
