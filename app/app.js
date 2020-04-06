@@ -331,21 +331,26 @@ am4core.ready(function() {
   //var list = covid_world_timeline[covid_world_timeline.length - 1].list;
 
   // Creamos una lista a partir de la respuesta que nos de el API
+  var list = [];
   var json_data;
-  var req = fetch('http://api.coronastatistics.live/timeline/global')
+  var req = fetch('http://api.coronastatistics.live/all')
             .then(function (response) {
                 //console.log(response.json())
                 return response.json();
             }).then(function(data){
-                console.log(data);
+                console.log(data.cases);
+                json_data = data;
+                console.log(json_data)
+                for(var i in json_data)
+                list.push([i, json_data[i]]);    
                 return data;
             })
             .catch(function (err) {
                 console.log('error: ' + err);
             });
             
-  var list = [];
-  console.log(json_data)
+  console.log(req)
+  console.log(list)
   for(var i in json_data)
     list.push([i, json_data[i]]);          
   
